@@ -1,0 +1,476 @@
+# geog-418
+
+---
+title: "lab 3"
+date: "2024-10-08"
+output: pdf_document
+---
+#output: 
+#  bookdown::html_document2:
+#    number_sections: false
+#   fig_caption: true
+#    global_numbering: true 
+
+
+## Introduction
+
+Introduction
+
+Welcome to this tutorial on performing spatial autocorrelation analysis using R. Spatial autocorrelation is a critical concept in spatial analysis that examines whether spatial patterns (such as household income levels or language knowledge) are randomly distributed or exhibit some form of clustering. Understanding and detecting spatial autocorrelation helps geographers and spatial analysts determine the extent to which geographic areas are similar to or different from their neighbors.
+
+In this tutorial, you will learn how to analyze spatial autocorrelation in household income data from the Canadian Census, focusing on Cape Breton as our study area. We'll use tools and libraries available in R to conduct both global and local spatial autocorrelation tests and visualize the results to gain insights into spatial patterns. This tutorial is intended to guide university students and researchers who are new to the field of spatial statistics or R programming.
+
+We will cover the following key areas:
+
+Data Preparation and Cleaning: Loading the data, cleaning it, and ensuring the geographic and census data are properly merged.
+
+Exploring Spatial Patterns: Visualizing income and French knowledge distributions across Cape Breton.
+
+Global and Local Spatial Autocorrelation Analysis: Applying Moran's I and Local Indicators of Spatial Association (LISA) to detect clustering patterns.
+
+Interpreting the Results: Understanding what the results mean for the spatial distribution of household income and French language knowledge.
+
+This document will walk you through each step, including the required R code, explanations of the concepts, and visual outputs to help solidify your understanding.
+
+Concept of Libraries
+
+To begin with, we need to load the appropriate R packages that will be used in the analysis. R packages, often referred to as libraries, are collections of functions and datasets developed by the R community. They help perform specialized tasks more efficiently, especially for spatial data.
+
+The following libraries are required for this tutorial:
+
+sf: For reading and processing spatial data.
+
+tmap: For visualizing spatial data.
+
+spdep: For calculating spatial autocorrelation metrics like Moran's I.
+
+raster, shinyjs, e1071: For additional geospatial analysis, user interface tools, and calculating descriptive statistics respectively.
+
+We begin by installing and loading these libraries:
+
+
+
+
+```{r Libraries, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
+#Install packages if not already installed:
+
+
+
+
+
+library("knitr")
+library("sf")
+library("tmap")
+library("spdep")
+library("raster")
+library("shinyjs")
+library("e1071")
+
+
+#Load in libraries:
+
+
+```
+
+The installation step ensures that all necessary libraries are available, while the library() calls load them for use in this tutorial.
+
+Data Preparation and Cleaning
+
+The dataset used in this tutorial contains household income data and census information for the Cape Breton region. We will start by reading both the shapefile containing geographic boundaries and the CSV file containing census variables. After merging these datasets, we will filter the data to include only relevant columns and focus on the target city: Cape Breton.
+
+Data preparation involves renaming columns, cleaning unnecessary rows, and calculating any new variables required for our analysis. For example, we convert French language knowledge into a percentage for easier interpretation and mapping.
+
+
+```{r Read in data, echo=TRUE, eval=TRUE, warning=FALSE}
+
+csv <- read.csv("/Users/swhitten/Downloads/Assignment3_Data/ucgsJQnBVLvP_data.csv") 
+
+shp <- st_read("/Users/swhitten/Downloads/Assignment3_Data/lda_000a16a_e.shp")
+
+
+```
+
+```{r Clean data, echo=TRUE, eval=TRUE, warning=FALSE}
+
+#New column names
+cols <- c("GEO UID", "Province code", "Province name", "CD code",
+          "CD name", "DA name", "Population", "Land area", 
+          "Median total income", "Income Sample Size", "French Knowledge", 
+          "Language Sample Size")
+
+
+# Apply correct column names to the dataframe
+colnames(csv) <- cols  # If you already have updated names for the columns
+
+# Add a column to count the number of characters in GEO UID
+csv$len <- nchar(as.character(csv$`GEO UID`))
+
+# Remove rows where GEO UID has fewer than 8 characters
+csv_clean <- subset(csv, csv$len == 8)
+
+# Merge the spatial and aspatial data using the correct column names
+census_DAs <- merge(shp, csv_clean, by.x = "DAUID", by.y = "GEO UID", all.x = TRUE)
+
+# Subset for the city of Kamloops (adjust this based on your data structure)
+Municp <- subset(census_DAs, census_DAs$CMANAME == "Cape Breton")
+
+# Convert French Knowledge to a rate
+Municp$PercFrench <- (Municp$`French Knowledge` / Municp$`Language Sample Size`) * 100
+
+
+
+
+```
+
+This step-by-step process ensures that the data is well-organized for our subsequent analyses.
+
+Including Plots
+
+Next, we want to clean up our data and make it easier to use. We first create a vector of column names to understand what data each column refers to. After cleaning up the dataset, we create visual representations of the median total income and the percentage of French knowledge in Cape Breton.
+
+```{r NA Remove, echo=TRUE, eval=TRUE, warning=FALSE}
+# Remove rows with NA values for Median total income and French Knowledge
+Income_noNA <- Municp[which(!is.na(Municp$`Median total income`)),]
+French_noNA <- Municp[which(!is.na(Municp$`French Knowledge`)),]
+
+```
+
+We use the tmap package to visualize the spatial patterns:
+
+
+
+
+```{r DescriptiveStats, echo=TRUE, eval=TRUE, warning=FALSE}
+# Calculate descriptive stats for Income
+meanIncome <- mean(Municp$`Median total income`, na.rm = TRUE)
+stdevIncome <- sd(Municp$`Median total income`, na.rm = TRUE)
+skewIncome <- e1071::skewness(Municp$`Median total income`, na.rm = TRUE)
+
+# Calculate descriptive stats for French Knowledge
+meanFrench <- mean(Municp$PercFrench, na.rm = TRUE)
+stdevFrench <- sd(Municp$PercFrench, na.rm = TRUE)
+skewFrench <- e1071::skewness(Municp$PercFrench, na.rm = TRUE)
+
+# Create a dataframe to display the statistics
+data <- data.frame(
+  Variable = c("Income", "French Language"),
+  Mean = c(round(meanIncome, 2), round(meanFrench, 2)),
+  StandardDeviation = c(round(stdevIncome, 2), round(stdevFrench, 2)),
+  Skewness = c(round(skewIncome, 2), round(skewFrench, 2))
+)
+
+# Display the table
+knitr::kable(data, caption = "Descriptive statistics for selected census variables")
+```
+
+
+
+```{r StudyArea, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap="Sydney census dissemination areas showing median total income (left) and percentage of respondants with knowledge of french (right)."}
+# Adjust the maps and layout
+map_Income <- tm_shape(Income_noNA) + 
+  tm_polygons(col = "Median total income", 
+              title = "Median Total Income (CAD)", 
+              style = "jenks", 
+              palette = "BuGn", n = 6,
+              border.alpha = 0,
+              colorNA = "grey") +
+  tm_layout(legend.position = c("right", "top"),
+            title.size = 1.8,
+            legend.title.size = 1.5,
+            legend.text.size = 0.8,
+            legend.frame = FALSE,
+            outer.margins = c(0.05, 0.05, 0.05, 0.05))  # Add margins for better spacing
+
+map_French <- tm_shape(French_noNA) + 
+  tm_polygons(col = "PercFrench", 
+              title = "French Knowledge (%)", 
+              style = "jenks", 
+              palette = "BuGn", n = 6,
+              border.alpha = 0,
+              colorNA = "grey") +
+  tm_layout(legend.position = c("right", "top"),
+            title.size = 1.8,
+            legend.title.size = 1.5,
+            legend.text.size = 0.8,
+            legend.frame = FALSE,
+            outer.margins = c(0.05, 0.05, 0.05, 0.05))  # Add margins for better spacing
+
+# Print maps side by side
+tmap_arrange(map_Income, map_French, ncol = 2, nrow = 1)
+```
+
+
+These maps provide a visualization of the median total income and percentage of French knowledge across the Cape Breton region. They help us understand whether areas with higher income or higher French language knowledge tend to cluster together spatially.
+
+
+Global Spatial Autocorrelation with Moran's I
+
+Moran's I is a global measure of spatial autocorrelation, which tests whether there is clustering of similar values across the entire study area. A positive Moran's I value indicates clustering of similar values (either high or low), while a negative value suggests a checkerboard pattern, where neighboring areas are different. A value near zero indicates a random spatial distribution.
+
+Here's how we perform and interpret the Moran's I analysis for median total income and French knowledge:
+
+```{r Neighbours, echo=TRUE, eval=TRUE, warning=FALSE}
+
+# For Queen's contiguity-based neighbors on Income data
+Income.nb <- poly2nb(Income_noNA)  # Create neighbors list
+Income_centroids <- st_centroid(Income_noNA)
+Income.net <- nb2lines(Income.nb, coords = st_coordinates(Income_centroids))
+
+# For Rook's contiguity-based neighbors on Income data
+Income.nb2 <- poly2nb(Income_noNA, queen = FALSE)
+Income.net2 <- nb2lines(Income.nb2, coords = st_coordinates(Income_centroids))
+
+# Set CRS for neighbors' networks (using sp)
+proj4string(Income.net) <- CRS(st_crs(Income_noNA)$proj4string)
+proj4string(Income.net2) <- CRS(st_crs(Income_noNA)$proj4string)
+
+# For Queen's contiguity-based neighbors on French data
+French.nb <- poly2nb(French_noNA)
+French_centroids <- st_centroid(French_noNA)
+French.net <- nb2lines(French.nb, coords = st_coordinates(French_centroids))
+
+# For Rook's contiguity-based neighbors on French data
+French.nb2 <- poly2nb(French_noNA, queen = FALSE)
+French.net2 <- nb2lines(French.nb2, coords = st_coordinates(French_centroids))
+
+# Set CRS for French networks
+proj4string(French.net) <- CRS(st_crs(French_noNA)$proj4string)
+proj4string(French.net2) <- CRS(st_crs(French_noNA)$proj4string)
+
+
+# Create weights matrix for Income data (Queen's neighbors)
+Income.lw <- nb2listw(Income.nb, zero.policy = TRUE, style = "W")
+
+# Calculate Moran's I for Income
+miIncome <- moran.test(Income_noNA$`Median total income`, Income.lw, zero.policy = TRUE)
+
+# Extract Moran's I results
+mIIncome <- miIncome$estimate[[1]]
+
+```
+
+In the analysis, a statistically significant positive value of Moran's I would suggest that high-income areas cluster together in Cape Breton, while negative values might indicate that high-income areas are located next to low-income areas. Similarly, the Moran's I for French knowledge would help identify clustering patterns for knowledge of French.
+
+Visual Interpretation of Moran's I
+
+Moran's I scatter plots provide a visual representation of spatial autocorrelation, showing the relationship between the values at a location and the spatial lag of those values. The regression line in the plot indicates the overall trend, where a positive slope shows positive spatial autocorrelation.
+
+```{r Neighboursmap, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap="Cape Breton census dissemination areas showing median total income neighbours queens weight (left)  rooks weight (middle) and the combination of the two (right)."}
+
+# Get the bounding box of the valid geometries
+bbox <- st_bbox(Income_noNA)
+
+# Make queens map
+IncomeQueen <- tm_shape(Income_noNA, bbox = bbox) + tm_borders(col='lightgrey') + 
+  tm_shape(Income.net) + tm_lines(col='red')
+
+# Make rooks map
+IncomeRook <- tm_shape(Income_noNA, bbox = bbox) + tm_borders(col='lightgrey') + 
+  tm_shape(Income.net2) + tm_lines(col='black', lwd = 2)
+
+# Make combined map
+IncomeBoth <- tm_shape(Income_noNA, bbox = bbox) + tm_borders(col='lightgrey') + 
+  tm_shape(Income.net) + tm_lines(col='red', lwd = 2) +
+  tm_shape(Income.net2) + tm_lines(col='black', lwd = 2)
+
+# Print maps in a three pane figure
+tmap_arrange(IncomeQueen, IncomeRook, IncomeBoth, ncol = 3, nrow = 1)
+
+```
+
+
+
+
+
+
+```{r Final weights, echo=TRUE, eval=TRUE, warning=FALSE}
+# Create Income weights matrix
+Income.lw <- nb2listw(Income.nb, zero.policy = TRUE, style = "W")
+
+# Create French weights matrix
+French.lw <- nb2listw(French.nb, zero.policy = TRUE, style = "W")
+
+# Access the weights (correct way)
+head(Income.lw$weights)[1:3]  # Accessing the first 3 weight vectors
+
+```
+
+
+
+$$
+I = \frac{\sum_{i=1}^n\sum_{j=1}^nW_{i,j}(x_i - \bar{x})(x_j - \bar{x})}{(\sum_{i=1}^n\sum_{j=1}^nW_{i,j})\sum_{i=1}^n(x_i - \bar{x})^2}
+$$
+
+
+
+```{r Global Morans I, echo=TRUE, eval=TRUE, warning=FALSE}
+#Calculate Global Moran's I for Income
+miIncome <- moran.test(Income_noNA$`Median total income`, Income.lw, zero.policy = TRUE)
+
+#Extract Global Moran's I results for Income
+mIIncome <- miIncome$estimate[[1]]
+eIIncome <- miIncome$estimate[[2]]
+varIncome <- miIncome$estimate[[3]]
+
+#Calculate Global Moran's I for French
+miFrench <- moran.test(French_noNA$PercFrench, French.lw, zero.policy = TRUE)
+
+#Extract Global Moran's I results for French
+mIFrench <- miFrench$estimate[[1]]
+eIFrench <- miFrench$estimate[[2]]
+varFrench <- miFrench$estimate[[3]]
+```
+
+
+
+```{r Global Morans Range, echo=TRUE, eval=TRUE, warning=FALSE}
+#Function to calculate the range of global Moran's I
+moran.range <- function(lw) {
+  wmat <- listw2mat(lw)
+  return(range(eigen((wmat + t(wmat))/2)$values))
+}
+
+#Calculate the range for the Income variable
+range <- moran.range(Income.lw)
+minRange <- range[1]
+maxRange <- range[2]
+```
+
+
+
+```{r Global Morans ZScore, echo=TRUE, eval=TRUE, warning=FALSE}
+#Calculate z-test for Income
+zIncome <- (mIIncome - eIIncome) / (sqrt(varIncome))
+
+#Calculate z-test for French
+zFrench <- (mIFrench - eIFrench) / (sqrt(varFrench))
+```
+
+
+
+
+$$
+I_i = \frac{x_i - \bar{x}}{S_i^2}\sum{_{j=1}^n}W_{i,j}(x_j - \bar{x})\space \space where \space \space S_i^2 = \frac{\sum_{i=1}^n (x_i - \bar{x})^2}{n-1} 
+$$
+
+Here, if $x$ is the variable being assessed, $x_i$ is the variable value at a point of interest (i) and $x_j$ represents a neighbour to $x_i$ (here determined by the queen weighting scheme). The spatial weighting applied to the weighting matrix $W_{i,j}$ is multiplied by both the differences of $x_i$ and the mean value of variable $x$, and $x_j$ and the mean value of variable $x$.
+
+The denominator in this case is used to standardize our values, and therefore relatively high values of I correspond with positive spatial autocorrelation, and relatively low values of I correspond with negative spatial autocorrelation. Remember that the global Moran’s I statistic provides an indication of how spatially autocorrelated our data is over the entire dataset, thus representing a spatial pattern at the global scale [15].
+
+```{r Local Morans I, echo=TRUE, eval=TRUE, warning=FALSE}
+#Calculate LISA test for Income
+lisa.testIncome <- localmoran(Income_noNA$`Median total income`, Income.lw)
+
+#Extract LISA test results for Income
+Income_noNA$Ii <- lisa.testIncome[,1]
+Income_noNA$E.Ii<- lisa.testIncome[,2]
+Income_noNA$Var.Ii<- lisa.testIncome[,3]
+Income_noNA$Z.Ii<- lisa.testIncome[,4]
+Income_noNA$P<- lisa.testIncome[,5]
+
+#Calculate LISA test for Income
+lisa.testFrench <- localmoran(French_noNA$PercFrench, French.lw)
+
+#Extract LISA test results for Income
+French_noNA$Ii <- lisa.testFrench [,1]
+French_noNA$E.Ii<- lisa.testFrench [,2]
+French_noNA$Var.Ii<- lisa.testFrench [,3]
+French_noNA$Z.Ii<- lisa.testFrench [,4]
+French_noNA$P<- lisa.testFrench [,5]
+```
+
+
+
+Describe the results.
+
+
+```{r MappingLocalMoransI, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap="Kamloops census dissemination areas showing LISA z-scores for median total income (left) and percentage of respondants with knowledge of french (right)."}
+#Map LISA z-scores for Income
+map_LISA_Income <- tm_shape(Income_noNA) +
+  tm_polygons(col = "Z.Ii",
+              title = "Local Moran's I Z-Scores",
+              style = "fixed",
+              border.alpha = 0.1,
+              midpoint = NA,
+              colorNA = NULL,
+              breaks = c(min(Income_noNA$Z.Ii),-1.96,1.96,max(Income_noNA$Z.Ii)),
+              palette = "-RdBu", n = 3)+
+  tm_compass(position=c("left", "top"))+
+  tm_scale_bar(position=c("left", "bottom"))+
+  tm_legend(position = c("right", "top"))
+
+#Map LISA z-scores for French
+map_LISA_French <- tm_shape(French_noNA) +
+  tm_polygons(col = "Z.Ii",
+              title = "Local Moran's I Z-Scores",
+              style = "fixed",
+              border.alpha = 0.1,
+              midpoint = NA,
+              colorNA = NULL,
+              breaks = c(min(French_noNA$Z.Ii),-1.96,1.96,max(French_noNA$Z.Ii)),
+              palette = "-RdBu", n = 3)+
+  tm_compass(position=c("left", "top"))+
+  tm_scale_bar(position=c("left", "bottom"))+
+  tm_legend(position = c("right", "top"))
+
+#Plot maps in a 2 pane figure
+tmap_arrange(map_LISA_Income, map_LISA_French, ncol = 2, nrow = 1)
+```
+
+Local Indicators of Spatial Association (LISA)
+
+Local Moran's I, or LISA, helps identify clusters of similar values and spatial outliers at the local level. LISA enables us to pinpoint specific areas within Cape Breton where high or low values are clustered or where anomalies occur.
+
+These LISA maps allow us to visualize which areas of Cape Breton have high or low values of income and French knowledge, and whether they are surrounded by similar or dissimilar areas.
+
+
+
+
+
+```{r MoransIScatter, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap= "Moran's I scatter plot for median total income."}
+#Create Moran's I scatter plot for Income
+moran.plot(Income_noNA$`Median total income`, Income.lw, zero.policy=TRUE, spChk=NULL, labels=NULL, xlab="Median Total Income ($)", 
+           ylab="Spatially Lagged Median Total Income ($)", quiet=NULL)
+```
+
+
+
+
+
+
+```{r MoransIScatter2, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap= "Moran's I scatter plot for percentage of respondants with knowledge of french."}
+#Create Moran's I scatter plot for French
+moran.plot(French_noNA$PercFrench, French.lw, zero.policy=TRUE, spChk=NULL, labels=NULL, xlab="Respondants with knowledge of French (%)", 
+           ylab="Spatially Lagged knowledge of French (%)", quiet=NULL)
+```
+
+
+
+Interpreting the Results
+
+From the Moran's I and LISA analyses, we can draw conclusions about spatial autocorrelation in Cape Breton:
+
+Global Moran's I: The results from Global Moran's I provide insights into whether spatial patterns of household income or French knowledge are clustered across the entire region. A positive and statistically significant Moran's I value indicates clustering, while a negative value suggests a pattern of dissimilarity between neighbors.
+
+LISA: The local Moran's I values help identify areas that contribute most to the global spatial autocorrelation. Hotspots (high values surrounded by high values) and cold spots (low values surrounded by low values) indicate strong local clustering, while outliers (high surrounded by low or vice versa) highlight areas that behave differently from their neighbors.
+
+Summary
+
+In this tutorial, we examined the spatial distribution of median total income and French knowledge in Cape Breton using spatial autocorrelation techniques. We used Moran's I to assess global clustering patterns and LISA to identify local clusters and spatial outliers.
+
+The analysis revealed that there are areas in Cape Breton where high-income households tend to cluster, and the same is true for knowledge of the French language. By identifying these clusters, we gain valuable insights into the socio-economic landscape of Cape Breton, which can help in urban planning and policy-making to target specific regions more effectively.
+
+
+## Summary
+
+Provide a brief summary.
+
+## References
+
+ 
+ 
+
+
+
+
+
