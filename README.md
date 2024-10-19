@@ -380,7 +380,10 @@ French_noNA$P<- lisa.testFrench [,5]
 
 
 
-Describe the results.
+The Local Indicators of Spatial Association (LISA) analysis reveals clusters and spatial outliers related to median total income and French language proficiency in Cape Breton. Utilizing the localmoran() function, it computes the local Moran's I statistic (Ii), which illustrates the degree of spatial clustering in each region. Additional metrics, including the expected value (E.Ii), variance (Var.Ii), Z-score (Z.Ii), and p-value (P), provide statistical support for these clusters, aiding in the assessment of the significance of observed patterns.
+
+This localized approach offers in-depth insights into income and language knowledge distribution, highlighting areas of high or low values while identifying notable outliers. It fosters a deeper understanding of socio-economic trends in Cape Breton, which is crucial for effective policy-making and targeted interventions.
+
 
 
 ```{r MappingLocalMoransI, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap="Kamloops census dissemination areas showing LISA z-scores for median total income (left) and percentage of respondants with knowledge of french (right)."}
