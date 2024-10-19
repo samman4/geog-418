@@ -6,47 +6,36 @@ date: "2024-10-08"
 output: pdf_document
 ---
 #output: 
-#  bookdown::html_document2:
+
 #    number_sections: false
-#   fig_caption: true
+#    fig_caption: true
 #    global_numbering: true 
 
 
 ## Introduction
 
 Introduction
+Welcome to this tutorial on conducting spatial autocorrelation analysis using R. Spatial autocorrelation is an important concept in spatial analysis that investigates whether spatial patterns—such as household income levels or language proficiency—are randomly distributed or show signs of clustering. By understanding and identifying spatial autocorrelation, geographers and spatial analysts can gauge how similar or different geographic areas are compared to their neighbors.
 
-Welcome to this tutorial on performing spatial autocorrelation analysis using R. Spatial autocorrelation is a critical concept in spatial analysis that examines whether spatial patterns (such as household income levels or language knowledge) are randomly distributed or exhibit some form of clustering. Understanding and detecting spatial autocorrelation helps geographers and spatial analysts determine the extent to which geographic areas are similar to or different from their neighbors.
+In this tutorial, you will learn to analyze spatial autocorrelation in household income data from the Canadian Census, concentrating on Cape Breton as our area of focus. We will utilize various tools and libraries in R to perform both global and local spatial autocorrelation tests and visualize the results for deeper insights into spatial patterns. This guide is aimed at university students and researchers who are new to spatial statistics or R programming.
 
-In this tutorial, you will learn how to analyze spatial autocorrelation in household income data from the Canadian Census, focusing on Cape Breton as our study area. We'll use tools and libraries available in R to conduct both global and local spatial autocorrelation tests and visualize the results to gain insights into spatial patterns. This tutorial is intended to guide university students and researchers who are new to the field of spatial statistics or R programming.
-
+Objectives
 We will cover the following key areas:
-
-Data Preparation and Cleaning: Loading the data, cleaning it, and ensuring the geographic and census data are properly merged.
-
-Exploring Spatial Patterns: Visualizing income and French knowledge distributions across Cape Breton.
-
-Global and Local Spatial Autocorrelation Analysis: Applying Moran's I and Local Indicators of Spatial Association (LISA) to detect clustering patterns.
-
-Interpreting the Results: Understanding what the results mean for the spatial distribution of household income and French language knowledge.
-
+1.	Data Preparation and Cleaning: Loading the data, cleaning it, and ensuring the geographic and census data are correctly merged.
+2.	Exploring Spatial Patterns: Visualizing income and French knowledge distributions across Cape Breton.
+3.	Global and Local Spatial Autocorrelation Analysis: Applying Moran's I and Local Indicators of Spatial Association (LISA) to detect clustering patterns.
+4.	Interpreting the Results: Understanding what the results mean for the spatial distribution of household income and French language knowledge.
 This document will walk you through each step, including the required R code, explanations of the concepts, and visual outputs to help solidify your understanding.
 
 Concept of Libraries
-
-To begin with, we need to load the appropriate R packages that will be used in the analysis. R packages, often referred to as libraries, are collections of functions and datasets developed by the R community. They help perform specialized tasks more efficiently, especially for spatial data.
-
+To begin with, we need to load the appropriate R packages for the analysis. R packages, often called libraries, are collections of functions and datasets developed by the R community. They help perform specialized tasks more efficiently, especially for spatial data.
 The following libraries are required for this tutorial:
-
-sf: For reading and processing spatial data.
-
-tmap: For visualizing spatial data.
-
-spdep: For calculating spatial autocorrelation metrics like Moran's I.
-
-raster, shinyjs, e1071: For additional geospatial analysis, user interface tools, and calculating descriptive statistics respectively.
-
+•	sf: For reading and processing spatial data.
+•	tmap: For visualizing spatial data.
+•	spdep: For calculating spatial autocorrelation metrics like Moran's I.
+•	raster, shinyjs, e1071: For additional geospatial analysis, user interface tools, and calculating descriptive statistics respectively.
 We begin by installing and loading these libraries:
+The installation step ensures that all necessary libraries are available while the library() calls load them in this tutorial.
 
 
 
@@ -75,10 +64,10 @@ library("e1071")
 The installation step ensures that all necessary libraries are available, while the library() calls load them for use in this tutorial.
 
 Data Preparation and Cleaning
+The dataset used in this tutorial contains household income data and census information for the Cape Breton region. We will start by reading the shapefile containing geographic boundaries and the CSV file containing census variables. After merging these datasets, we will filter the data to include only relevant columns and focus on the target city, Cape Breton.
 
-The dataset used in this tutorial contains household income data and census information for the Cape Breton region. We will start by reading both the shapefile containing geographic boundaries and the CSV file containing census variables. After merging these datasets, we will filter the data to include only relevant columns and focus on the target city: Cape Breton.
+Data preparation involves renaming columns, cleaning unnecessary rows, and calculating any new variables required for our analysis. For example, we convert French language knowledge into a percentage for easier interpretation and mapping. This step-by-step process ensures the data is well organized for our subsequent analyses.
 
-Data preparation involves renaming columns, cleaning unnecessary rows, and calculating any new variables required for our analysis. For example, we convert French language knowledge into a percentage for easier interpretation and mapping.
 
 
 ```{r Read in data, echo=TRUE, eval=TRUE, warning=FALSE}
@@ -125,8 +114,10 @@ Municp$PercFrench <- (Municp$`French Knowledge` / Municp$`Language Sample Size`)
 This step-by-step process ensures that the data is well-organized for our subsequent analyses.
 
 Including Plots
+To better understand the data, we create visual representations of the median total income and the percentage of French knowledge in Cape Breton.
+We use the tmap package to visualize the spatial patterns:
+These maps provide a visualization of the median total income and percentage of French knowledge across the Cape Breton region. They help us understand whether areas with higher income or French language knowledge tend to cluster together spatially.
 
-Next, we want to clean up our data and make it easier to use. We first create a vector of column names to understand what data each column refers to. After cleaning up the dataset, we create visual representations of the median total income and the percentage of French knowledge in Cape Breton.
 
 ```{r NA Remove, echo=TRUE, eval=TRUE, warning=FALSE}
 # Remove rows with NA values for Median total income and French Knowledge
@@ -163,7 +154,7 @@ data <- data.frame(
 knitr::kable(data, caption = "Descriptive statistics for selected census variables")
 ```
 
-
+We create maps with the tmap package, known for its strength in visualizing spatial data in R. The tm_shape() function defines geographic boundaries, specifically the Cape Breton census dissemination areas, while tm_polygons() visualizes certain attributes such as median total income and French language proficiency. Various colours indicate different values within regions, and we utilize the tm_layout() function to refine legends, titles, and layout for improved readability. Displaying multiple maps side by side allows for comparative visual insights, highlighting differences in the spatial distribution of these attributes.
 
 ```{r StudyArea, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap="Sydney census dissemination areas showing median total income (left) and percentage of respondants with knowledge of french (right)."}
 # Adjust the maps and layout
@@ -204,8 +195,10 @@ These maps provide a visualization of the median total income and percentage of 
 
 
 Global Spatial Autocorrelation with Moran's I
+Moran's I is a global measure of spatial autocorrelation, which tests whether similar values are clustered across the entire study area. A positive Moran's I value indicates clustering of similar values (either high or low), while a negative value suggests a checkerboard pattern where neighbouring areas differ. A value near zero indicates a random spatial distribution.
+Here's how we perform and interpret the Moran's I analysis for median total income and French knowledge:
+A statistically significant positive value of Moran's is found in the analysis. I would suggest that high-income areas cluster together in Cape Breton. In contrast, negative values might indicate that high-income regions are following to low-income areas. Similarly, Moran's I for French knowledge would help identify clustering patterns for knowledge of French.
 
-Moran's I is a global measure of spatial autocorrelation, which tests whether there is clustering of similar values across the entire study area. A positive Moran's I value indicates clustering of similar values (either high or low), while a negative value suggests a checkerboard pattern, where neighboring areas are different. A value near zero indicates a random spatial distribution.
 
 Here's how we perform and interpret the Moran's I analysis for median total income and French knowledge:
 
@@ -252,8 +245,8 @@ mIIncome <- miIncome$estimate[[1]]
 In the analysis, a statistically significant positive value of Moran's I would suggest that high-income areas cluster together in Cape Breton, while negative values might indicate that high-income areas are located next to low-income areas. Similarly, the Moran's I for French knowledge would help identify clustering patterns for knowledge of French.
 
 Visual Interpretation of Moran's I
+Moran's I scatter plots visually represent spatial autocorrelation, showing the relationship between the values at a location and the spatial lag of those values. The regression line in the plot indicates the overall trend, where a positive slope shows positive spatial autocorrelation.
 
-Moran's I scatter plots provide a visual representation of spatial autocorrelation, showing the relationship between the values at a location and the spatial lag of those values. The regression line in the plot indicates the overall trend, where a positive slope shows positive spatial autocorrelation.
 
 ```{r Neighboursmap, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap="Cape Breton census dissemination areas showing median total income neighbours queens weight (left)  rooks weight (middle) and the combination of the two (right)."}
 
@@ -279,6 +272,11 @@ tmap_arrange(IncomeQueen, IncomeRook, IncomeBoth, ncol = 3, nrow = 1)
 ```
 
 
+The weighted matrix plays a vital role in spatial analysis, as it illustrates the spatial relationships among various geographic regions. It indicates which regions are neighbours and the strength of their influence on one another, which is crucial for evaluating spatial autocorrelation. In the tutorial, we initiate the process by generating a list of neighbours for each spatial polygon using the poly2nb() function from the spdep package. This function examines shared boundaries between polygons to determine neighbouring relationships. We employ both Queen’s contiguity and Rook’s contiguity for this purpose. Queen’s contiguity accounts for polygons sharing either a boundary or a point, while Rook’s contiguity only considers those sharing a standard edge.
+
+Once the neighbour lists are created, we convert them into a weighted matrix with the nb2listw() function. This function takes the neighbour relationships and assigns weights, crucial for later spatial autocorrelation calculations. For instance, by applying row-standardized weights (style = "W"), each neighbour receives an equal weight that sums to 1 for each polygon. Consequently, each area equally influences its neighbours, though the distribution of that influence varies depending on the number of neighbours present. We also include the parameter zero.policy = TRUE to manage instances where a polygon lacks neighbours.
+
+This weighted matrix is then utilized in calculating Moran’s I, which measures the similarity or differences between each polygon and its neighbours. By defining spatial weights, we ensure that the calculations reflect the degree of relatedness among geographic areas. Thus, the weighted matrix is crucial for grasping the spatial dynamics involved, whether we analyze income levels or other socio-economic indicators.
 
 
 
@@ -353,9 +351,10 @@ $$
 I_i = \frac{x_i - \bar{x}}{S_i^2}\sum{_{j=1}^n}W_{i,j}(x_j - \bar{x})\space \space where \space \space S_i^2 = \frac{\sum_{i=1}^n (x_i - \bar{x})^2}{n-1} 
 $$
 
-Here, if $x$ is the variable being assessed, $x_i$ is the variable value at a point of interest (i) and $x_j$ represents a neighbour to $x_i$ (here determined by the queen weighting scheme). The spatial weighting applied to the weighting matrix $W_{i,j}$ is multiplied by both the differences of $x_i$ and the mean value of variable $x$, and $x_j$ and the mean value of variable $x$.
+In this context, let $x$ be the assessed variable, where $x_i$ denotes the variable value at a specific point of interest (i) and $x_j$ signifies a neighbor of $x_i$, determined by the queen weighting scheme. The spatial weighting applied through the matrix $W_{i,j}$ is multiplied by the differences between $x_i$ and the mean value of variable $x$, and between $x_j$ and the mean value of variable $x$.
 
-The denominator in this case is used to standardize our values, and therefore relatively high values of I correspond with positive spatial autocorrelation, and relatively low values of I correspond with negative spatial autocorrelation. Remember that the global Moran’s I statistic provides an indication of how spatially autocorrelated our data is over the entire dataset, thus representing a spatial pattern at the global scale [15].
+The denominator in this scenario standardizes our values, indicating that higher values of I are associated with positive spatial autocorrelation, while lower values of I indicate negative spatial autocorrelation. It is important to note that the global Moran’s I statistic shows how spatially autocorrelated the data is across the entire dataset, thereby illustrating a spatial pattern on a global scale.
+
 
 ```{r Local Morans I, echo=TRUE, eval=TRUE, warning=FALSE}
 #Calculate LISA test for Income
@@ -418,12 +417,8 @@ tmap_arrange(map_LISA_Income, map_LISA_French, ncol = 2, nrow = 1)
 ```
 
 Local Indicators of Spatial Association (LISA)
-
-Local Moran's I, or LISA, helps identify clusters of similar values and spatial outliers at the local level. LISA enables us to pinpoint specific areas within Cape Breton where high or low values are clustered or where anomalies occur.
-
-These LISA maps allow us to visualize which areas of Cape Breton have high or low values of income and French knowledge, and whether they are surrounded by similar or dissimilar areas.
-
-
+Local Moran's I, or LISA, helps locally identify clusters of similar values and spatial outliers. LISA lets us pinpoint areas within Cape Breton where high or low values are clustered or anomalies occur.
+These LISA maps allow us to visualize which areas of Cape Breton have high or low income and French knowledge values and whether similar or dissimilar regions surround them.
 
 
 
@@ -432,9 +427,6 @@ These LISA maps allow us to visualize which areas of Cape Breton have high or lo
 moran.plot(Income_noNA$`Median total income`, Income.lw, zero.policy=TRUE, spChk=NULL, labels=NULL, xlab="Median Total Income ($)", 
            ylab="Spatially Lagged Median Total Income ($)", quiet=NULL)
 ```
-
-
-
 
 
 
@@ -454,20 +446,23 @@ Global Moran's I: The results from Global Moran's I provide insights into whethe
 
 LISA: The local Moran's I values help identify areas that contribute most to the global spatial autocorrelation. Hotspots (high values surrounded by high values) and cold spots (low values surrounded by low values) indicate strong local clustering, while outliers (high surrounded by low or vice versa) highlight areas that behave differently from their neighbors.
 
-Summary
+## Summary
 
 In this tutorial, we examined the spatial distribution of median total income and French knowledge in Cape Breton using spatial autocorrelation techniques. We used Moran's I to assess global clustering patterns and LISA to identify local clusters and spatial outliers.
 
 The analysis revealed that there are areas in Cape Breton where high-income households tend to cluster, and the same is true for knowledge of the French language. By identifying these clusters, we gain valuable insights into the socio-economic landscape of Cape Breton, which can help in urban planning and policy-making to target specific regions more effectively.
 
 
-## Summary
 
-Provide a brief summary.
+
+
 
 ## References
 
- 
+•	Anselin, L. (1995). Local Indicators of Spatial Association—LISA. Geographical Analysis, 27(2), 93-115.
+•	Bivand, R., Pebesma, E., & Gomez-Rubio, V. (2013). Applied Spatial Data Analysis with R. Springer.
+•	Moran, P. A. P. (1950). Notes on Continuous Stochastic Phenomena. Biometrika, 37(1/2), 17-23.
+
  
 
 
