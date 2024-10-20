@@ -465,6 +465,7 @@ The analysis revealed that there are areas in Cape Breton where high-income hous
 •	Anselin, L. (1995). Local Indicators of Spatial Association—LISA. Geographical Analysis, 27(2), 93-115.
 •	Bivand, R., Pebesma, E., & Gomez-Rubio, V. (2013). Applied Spatial Data Analysis with R. Springer.
 •	Moran, P. A. P. (1950). Notes on Continuous Stochastic Phenomena. Biometrika, 37(1/2), 17-23.
+•         Auclair, N., Frigon, C., & St-Amant, G. (2023, March 16). Key facts on the French language in Nova Scotia in 2021. Statistics Canada. https://www150.statcan.gc.ca/n1/pub/89-657-x/89-657-x2023003-eng.htm
 
  
 
