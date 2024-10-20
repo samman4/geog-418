@@ -1,7 +1,7 @@
-# geog-418
+# Geography 418 Lab 3 Tutorial - Sam Whitten
 
 ---
-title: "lab 3"
+title: "Spatial Autocorrelation Analysis of Household Income and French Language Knowledge in Cape Breton Using R"
 date: "2024-10-08"
 output: pdf_document
 ---
@@ -15,9 +15,9 @@ output: pdf_document
 ## Introduction
 
 Introduction
-Welcome to this tutorial on conducting spatial autocorrelation analysis using R. Spatial autocorrelation is an important concept in spatial analysis that investigates whether spatial patterns—such as household income levels or language proficiency—are randomly distributed or show signs of clustering. By understanding and identifying spatial autocorrelation, geographers and spatial analysts can gauge how similar or different geographic areas are compared to their neighbors.
+Welcome to this tutorial on conducting spatial autocorrelation analysis using R. Spatial autocorrelation is an essential concept in spatial analysis. It investigates whether spatial patterns—such as household income levels or language proficiency—are randomly distributed or show signs of clustering. By understanding and identifying spatial autocorrelation, geographers and spatial analysts can gauge how similar or different geographic areas are compared to their neighbours.
 
-In this tutorial, you will learn to analyze spatial autocorrelation in household income data from the Canadian Census, concentrating on Cape Breton as our area of focus. We will utilize various tools and libraries in R to perform both global and local spatial autocorrelation tests and visualize the results for deeper insights into spatial patterns. This guide is aimed at university students and researchers who are new to spatial statistics or R programming.
+In this tutorial, you will learn to analyze spatial autocorrelation in household income data from the Canadian Census, concentrating on Cape Breton as our area of focus. We will utilize various R tools and libraries to perform global and local spatial autocorrelation tests and visualize the results for deeper insights into spatial patterns. This guide is aimed at university students and researchers new to spatial statistics or R programming.
 
 Objectives
 We will cover the following key areas:
@@ -42,9 +42,6 @@ The installation step ensures that all necessary libraries are available while t
 
 ```{r Libraries, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 #Install packages if not already installed:
-
-
-
 
 
 library("knitr")
