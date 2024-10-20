@@ -151,6 +151,10 @@ data <- data.frame(
 knitr::kable(data, caption = "Descriptive statistics for selected census variables")
 ```
 
+<img width="485" alt="Screenshot 2024-10-20 at 1 23 35 PM" src="https://github.com/user-attachments/assets/b4767741-2d21-4cf3-9a43-f5c018a48c6c">
+
+
+
 We create maps with the tmap package, known for its strength in visualizing spatial data in R. The tm_shape() function defines geographic boundaries, specifically the Cape Breton census dissemination areas, while tm_polygons() visualizes certain attributes such as median total income and French language proficiency. Various colours indicate different values within regions, and we utilize the tm_layout() function to refine legends, titles, and layout for improved readability. Displaying multiple maps side by side allows for comparative visual insights, highlighting differences in the spatial distribution of these attributes.
 
 ```{r StudyArea, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap="Sydney census dissemination areas showing median total income (left) and percentage of respondants with knowledge of french (right)."}
