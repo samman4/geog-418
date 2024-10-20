@@ -297,6 +297,7 @@ French.lw <- nb2listw(French.nb, zero.policy = TRUE, style = "W")
 head(Income.lw$weights)[1:3]  # Accessing the first 3 weight vectors
 
 ```
+<img width="485" alt="Screenshot 2024-10-20 at 1 23 35 PM" src="https://github.com/user-attachments/assets/c4506cc9-37e3-4c35-85ba-7d28c8c6aed7">
 
 
 
