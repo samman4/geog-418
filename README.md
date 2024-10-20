@@ -15,7 +15,7 @@ output: pdf_document
 ## Introduction
 
 Introduction
-Welcome to this tutorial on conducting spatial autocorrelation analysis using R. Spatial autocorrelation is an essential concept in spatial analysis. It investigates whether spatial patterns—such as household income levels or language proficiency—are randomly distributed or show signs of clustering. By understanding and identifying spatial autocorrelation, geographers and spatial analysts can gauge how similar or different geographic areas are compared to their neighbours.
+Welcome to this tutorial on conducting spatial autocorrelation analysis using R. Spatial autocorrelation is an essential concept in spatial analysis. It investigates whether spatial patterns—such as household income levels or language proficiency—are randomly distributed or show signs of clustering. By understanding and identifying spatial autocorrelation, geographers and spatial analysts can gauge how similar or different geographic areas are compared to their neighbours. The data used in this analysis is sourced from the Canadian Census, focusing specifically on household income and French language knowledge for the Cape Breton region.
 
 In this tutorial, you will learn to analyze spatial autocorrelation in household income data from the Canadian Census, concentrating on Cape Breton as our area of focus. We will utilize various R tools and libraries to perform global and local spatial autocorrelation tests and visualize the results for deeper insights into spatial patterns. This guide is aimed at university students and researchers new to spatial statistics or R programming.
 
