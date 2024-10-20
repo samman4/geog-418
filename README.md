@@ -383,7 +383,7 @@ This localized approach offers in-depth insights into income and language knowle
 
 
 
-```{r MappingLocalMoransI, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap="Kamloops census dissemination areas showing LISA z-scores for median total income (left) and percentage of respondants with knowledge of french (right)."}
+```{r MappingLocalMoransI, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap="Cape Breton census dissemination areas showing LISA z-scores for median total income (left) and percentage of respondants with knowledge of french (right)."}
 #Map LISA z-scores for Income
 map_LISA_Income <- tm_shape(Income_noNA) +
   tm_polygons(col = "Z.Ii",
