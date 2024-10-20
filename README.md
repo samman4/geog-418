@@ -323,7 +323,17 @@ miFrench <- moran.test(French_noNA$PercFrench, French.lw, zero.policy = TRUE)
 mIFrench <- miFrench$estimate[[1]]
 eIFrench <- miFrench$estimate[[2]]
 varFrench <- miFrench$estimate[[3]]
+
+#Create dataframe for display in table
+data_global <- data.frame(Variable = c("Income", "French Language"),
+                   Global = c(round(mIIncome,5), round(mIFrench,5)),
+                   Expected = c(round(eIIncome,5), round(eIFrench,5)),
+                   Variance = c(round(varIncome,5), round(varFrench,5)))
+
+#Produce table
+kable(data_global, caption = paste0("Global Moran's I, expected I and variance for selected ", 2016, " census variables"))
 ```
+<img width="310" alt="Screenshot 2024-10-20 at 1 54 55 PM" src="https://github.com/user-attachments/assets/76e21019-867b-464b-9232-8aefb84cc13c">
 
 
 
