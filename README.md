@@ -275,7 +275,7 @@ IncomeBoth <- tm_shape(Income_noNA, bbox = bbox) + tm_borders(col='lightgrey') +
 tmap_arrange(IncomeQueen, IncomeRook, IncomeBoth, ncol = 3, nrow = 1)
 
 ```
-
+This figure demonstrates the spatial relationships in Cape Breton’s census dissemination areas according to different contiguity rules. The left map illustrates Queen’s contiguity, where areas connect via shared boundaries or vertices, creating a dense network of connections (red lines). The middle map represents Rook’s contiguity, which only includes areas with a standard edge (black lines), resulting in a more organized and less dense network. The right map integrates both contiguities, highlighting the intersections of these spatial relationships to provide a comprehensive overview of spatial dependencies in the region.
 
 The weighted matrix plays a vital role in spatial analysis, as it illustrates the spatial relationships among various geographic regions. It indicates which regions are neighbours and the strength of their influence on one another, which is crucial for evaluating spatial autocorrelation. In the tutorial, we initiate the process by generating a list of neighbours for each spatial polygon using the poly2nb() function from the spdep package. This function examines shared boundaries between polygons to determine neighbouring relationships. We employ both Queen’s contiguity and Rook’s contiguity for this purpose. Queen’s contiguity accounts for polygons sharing either a boundary or a point, while Rook’s contiguity only considers those sharing a standard edge.
 
@@ -429,6 +429,7 @@ tmap_arrange(map_LISA_Income, map_LISA_French, ncol = 2, nrow = 1)
 <img width="694" alt="Screenshot 2024-10-20 at 10 17 43 AM" src="https://github.com/user-attachments/assets/4db7630a-0989-4460-a4e0-2fa801bd6bf3">
 
 
+The maps illustrate the spatial distribution of Local Moran’s I Z-scores, emphasizing regions of clustering or dispersion within census tracts. Areas marked with red polygons represent a significant positive Z-score (>1.96), indicating clusters of high values (hot spots). Conversely, blue polygons highlight areas with significantly negative Z-scores (<-1.96), which denote clusters of low values or dispersed patterns (cold spots). White polygons have Z-scores ranging from -1.96 to 1.96, implying a random distribution where the null hypothesis (random distribution) remains valid. These visual patterns assist in pinpointing specific areas that require further analysis or policy intervention.
 
 Local Indicators of Spatial Association (LISA)
 Local Moran's I, or LISA, helps locally identify clusters of similar values and spatial outliers. LISA lets us pinpoint areas within Cape Breton where high or low values are clustered or anomalies occur.
@@ -454,20 +455,21 @@ moran.plot(French_noNA$PercFrench, French.lw, zero.policy=TRUE, spChk=NULL, labe
 
 <img width="675" alt="Screenshot 2024-10-20 at 10 18 56 AM" src="https://github.com/user-attachments/assets/fec1d019-9d5b-45f1-b61b-a9260d043337">
 
+The scatter plots above illustrate the spatial lag relationships between median total income and French language proficiency in Cape Breton. Each dot represents a geographic region, showing its variable value versus the average value of its neighbouring areas. The best-fit line reflects the overall trend, where a positive slope indicates positive spatial autocorrelation. This suggests that regions with higher income or greater proficiency in French are likely to be surrounded by similar areas. Points that deviate significantly from this line could represent spatial outliers, drawing attention to regions that differ notably from their neighbours.
 
 Interpreting the Results
 
-From the Moran's I and LISA analyses, we can draw conclusions about spatial autocorrelation in Cape Breton:
+From the Moran's I and LISA analyses, we can conclude spatial autocorrelation in Cape Breton:
 
-Global Moran's I: The results from Global Moran's I provide insights into whether spatial patterns of household income or French knowledge are clustered across the entire region. A positive and statistically significant Moran's I value indicates clustering, while a negative value suggests a pattern of dissimilarity between neighbors.
+Global Moran's I: The results from Global Moran's I provide insights into whether spatial household income or French knowledge patterns are clustered across the entire region. A positive and statistically significant Moran's I value indicates clustering, while a negative value suggests a pattern of dissimilarity between neighbours.
 
-LISA: The local Moran's I values help identify areas that contribute most to the global spatial autocorrelation. Hotspots (high values surrounded by high values) and cold spots (low values surrounded by low values) indicate strong local clustering, while outliers (high surrounded by low or vice versa) highlight areas that behave differently from their neighbors.
+LISA: The local Moran's I values help identify areas that contribute most to the global spatial autocorrelation. Hotspots (high values surrounded by high values) and cold spots (low values surrounded by low values) indicate local solid clustering. In contrast, outliers (high surrounded by low or vice versa) highlight areas that behave differently from their neighbours.
 
 ## Summary
 
-In this tutorial, we examined the spatial distribution of median total income and French knowledge in Cape Breton using spatial autocorrelation techniques. We used Moran's I to assess global clustering patterns and LISA to identify local clusters and spatial outliers.
+This tutorial examined the spatial distribution of median total income and French knowledge in Cape Breton using spatial autocorrelation techniques. We used Moran's I to assess global clustering patterns and LISA to identify local clusters and spatial outliers.
 
-The analysis revealed that there are areas in Cape Breton where high-income households tend to cluster, and the same is true for knowledge of the French language. By identifying these clusters, we gain valuable insights into the socio-economic landscape of Cape Breton, which can help in urban planning and policy-making to target specific regions more effectively.
+The analysis revealed areas in Cape Breton where high-income households tend to cluster, and the same is true for knowledge of the French language. By identifying these clusters, we gain valuable insights into the socio-economic landscape of Cape Breton, which can help in urban planning and policy-making to target specific regions more effectively.
 
 
 
