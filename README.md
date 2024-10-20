@@ -186,6 +186,7 @@ map_French <- tm_shape(French_noNA) +
 # Print maps side by side
 tmap_arrange(map_Income, map_French, ncol = 2, nrow = 1)
 ```
+<img width="697" alt="Screenshot 2024-10-20 at 10 18 17 AM" src="https://github.com/user-attachments/assets/d4be29a0-fb97-4468-8e2a-a35505ce912a">
 
 
 These maps provide a visualization of the median total income and percentage of French knowledge across the Cape Breton region. They help us understand whether areas with higher income or higher French language knowledge tend to cluster together spatially.
@@ -238,6 +239,9 @@ miIncome <- moran.test(Income_noNA$`Median total income`, Income.lw, zero.policy
 mIIncome <- miIncome$estimate[[1]]
 
 ```
+
+<img width="697" alt="Screenshot 2024-10-20 at 10 18 26 AM" src="https://github.com/user-attachments/assets/62ec160b-95de-4c3d-ae4b-9ec5d5e5c4be">
+
 
 In the analysis, a statistically significant positive value of Moran's I would suggest that high-income areas cluster together in Cape Breton, while negative values might indicate that high-income areas are located next to low-income areas. Similarly, the Moran's I for French knowledge would help identify clustering patterns for knowledge of French.
 
@@ -416,6 +420,11 @@ map_LISA_French <- tm_shape(French_noNA) +
 tmap_arrange(map_LISA_Income, map_LISA_French, ncol = 2, nrow = 1)
 ```
 
+
+<img width="694" alt="Screenshot 2024-10-20 at 10 17 43 AM" src="https://github.com/user-attachments/assets/4db7630a-0989-4460-a4e0-2fa801bd6bf3">
+
+
+
 Local Indicators of Spatial Association (LISA)
 Local Moran's I, or LISA, helps locally identify clusters of similar values and spatial outliers. LISA lets us pinpoint areas within Cape Breton where high or low values are clustered or anomalies occur.
 These LISA maps allow us to visualize which areas of Cape Breton have high or low income and French knowledge values and whether similar or dissimilar regions surround them.
@@ -428,6 +437,8 @@ moran.plot(Income_noNA$`Median total income`, Income.lw, zero.policy=TRUE, spChk
            ylab="Spatially Lagged Median Total Income ($)", quiet=NULL)
 ```
 
+<img width="752" alt="Screenshot 2024-10-20 at 10 18 50 AM" src="https://github.com/user-attachments/assets/ae9a8154-3c71-4d11-b692-bdbe894a802a">
+
 
 
 ```{r MoransIScatter2, echo=TRUE, eval=TRUE, warning=FALSE, fig.cap= "Moran's I scatter plot for percentage of respondants with knowledge of french."}
@@ -436,6 +447,7 @@ moran.plot(French_noNA$PercFrench, French.lw, zero.policy=TRUE, spChk=NULL, labe
            ylab="Spatially Lagged knowledge of French (%)", quiet=NULL)
 ```
 
+<img width="675" alt="Screenshot 2024-10-20 at 10 18 56 AM" src="https://github.com/user-attachments/assets/fec1d019-9d5b-45f1-b61b-a9260d043337">
 
 
 Interpreting the Results
